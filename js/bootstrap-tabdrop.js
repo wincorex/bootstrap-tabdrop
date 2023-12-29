@@ -5,6 +5,7 @@
  * Copyright 2012 Stefan Petre
  * Copyright 2013 Jenna Schabdach
  * Copyright 2014 Jose Ant. Aranda
+ * Copyright 2023 Petr Vavrik
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +57,9 @@
 		this.options = options;
 
 		if (options.align === "left")
-			this.dropdown = $('<li class="dropdown hide pull-left tabdrop"><a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;"><span class="display-tab"></span><b class="caret"></b></a><ul class="dropdown-menu"></ul></li>');
+			this.dropdown = $('<li class="nav-item dropdown d-none pull-left tabdrop"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" href="javascript:;"><span class="display-tab"></span><b class="caret"></b></a><ul class="dropdown-menu"></ul></li>');
 		else
-			this.dropdown = $('<li class="dropdown hide pull-right tabdrop"><a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;"><span class="display-tab"></span><b class="caret"></b></a><ul class="dropdown-menu"></ul></li>');
+			this.dropdown = $('<li class="nav-item dropdown d-none pull-right tabdrop"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" href="javascript:;"><span class="display-tab"></span><b class="caret"></b></a><ul class="dropdown-menu"></ul></li>');
 
 		this.dropdown.prependTo(this.element);
 		if (this.element.parent().is('.tabs-below')) {
@@ -69,7 +70,7 @@
 
 		WinResizer.register(boundLayout);
 		this.element.on('shown.bs.tab', function (e) {
-   		boundLayout();
+	 		boundLayout();
  		});
 
 		this.teardown = function () {
@@ -88,9 +89,9 @@
 		layout: function () {
 			var self = this;
 			var collection = [];
-      var isUsingFlexbox = function(el){
-        return el.element.css('display').indexOf('flex') > -1;
-      };
+			var isUsingFlexbox = function(el){
+				return el.element.css('display').indexOf('flex') > -1;
+			};
 
 			function setDropdownText(text) {
 				self.dropdown.find('a span.display-tab').html(text);
@@ -106,48 +107,63 @@
 				setDropdownText(text);
 			}
 
-      // Flexbox support
-      function handleFlexbox(){
-        if (isUsingFlexbox(self)){
-          if (self.element.find('li.tabdrop').hasClass('pull-right')){
-          	self.element.find('li.tabdrop').css({position: 'absolute', right: 0});
+			// Flexbox support
+			function handleFlexbox(){
+				if (isUsingFlexbox(self)){
+					if (self.element.find('li.tabdrop').hasClass('pull-right')){
+						self.element.find('li.tabdrop').css({position: 'absolute', right: 0});
 						self.element.css('padding-right', self.element.find('.tabdrop').outerWidth(true));
-          }
-        }  
-      }
+					}
+				}	
+			}
 
 			function checkOffsetAndPush(recursion) {
 				self.element.find('> li:not(.tabdrop)')
 					.each(function () {
 						if (this.offsetTop > self.options.offsetTop) {
+							$(this).removeAttr('class')
+								.find('a')
+								.removeClass('nav-link')
+								.addClass('dropdown-item')
+							;
 							collection.push(this);
 						}
 					});
 
 				if (collection.length > 0) {
 					if (!recursion) {
-						self.dropdown.removeClass('hide');
+						self.dropdown.removeClass('d-none');
 						self.dropdown.find('ul').empty();
 					}
 					self.dropdown.find('ul').prepend(collection);
 					
-					if (self.dropdown.find('.active').length == 1) {
+					if (self.dropdown.find('.active').length >= 1) {
 						self.dropdown.addClass('active');
 						setDropdownText(self.dropdown.find('.active > a').html());
 					} else {
 						self.dropdown.removeClass('active');
 						setDropdownDefaultText(collection);
 					}
-          handleFlexbox();
+					handleFlexbox();
 					collection = [];
 					checkOffsetAndPush(true);
 				} else {
 					if (!recursion) {
-						self.dropdown.addClass('hide');
+						self.dropdown.addClass('d-none');
+
+						self.element.each(function(){
+							$(this).find('>li').addClass('nav-item')
+								.find('>a')
+								.removeClass('dropdown-item')
+								.addClass('nav-link')
+							;
+						});
+
+						self.dropdown.find('>a').removeClass('active');
 					}
 				}
 			}
-    
+		
 			self.element.append(self.dropdown.find('li'));
 			checkOffsetAndPush();
 		}
@@ -170,7 +186,7 @@
 	};
 
 	$.fn.tabdrop.defaults = {
-		text: '<i class="glyphicon glyphicon-menu-hamburger"></i>',
+		text: '<b class="bi bi-list"></b>',
 		offsetTop: 0
 	};
 
