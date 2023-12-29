@@ -13,7 +13,7 @@ Added functionality: Allows customizable offset to determine whether tab is over
 
 ## Requirements
 
-* [Bootstrap](http://twitter.github.com/bootstrap/) 2.0.4+
+* [Bootstrap](http://twitter.github.com/bootstrap/) 5.2.+
 * [jQuery](http://jquery.com/) 1.7.1+
 
 ## Example
